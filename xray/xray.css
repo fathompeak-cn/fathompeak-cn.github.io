@@ -1,0 +1,181 @@
+/* ==========================================================
+   XRAY 层 —— 在镜像页面上叠加的“揭穿”视觉层
+   不改动原站 CSS；全部选择器以 .x- / #xray 开头，避免冲突
+   ========================================================== */
+:root{--x-red:#D7263D;--x-red-soft:rgba(215,38,61,.12);--x-ink:#1B1B1E;--x-paper:#FFFDFB;}
+
+/* ---------- 顶部角标：始终可见，声明这是镜像副本 ---------- */
+#xray-badge{position:fixed;left:14px;bottom:14px;z-index:9998;display:flex;gap:10px;align-items:center;
+  padding:7px 12px;border-radius:999px;background:rgba(255,253,251,.92);border:1px solid var(--line);
+  font:500 12px/1.2 var(--sans,system-ui);color:var(--ink-70);box-shadow:0 8px 24px -12px rgba(0,0,0,.35);
+  backdrop-filter:blur(10px);cursor:pointer;transition:transform .2s var(--ease)}
+#xray-badge:hover{transform:translateY(-1px)}
+#xray-badge b{color:var(--x-red);font-weight:600}
+#xray-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--x-red);box-shadow:0 0 0 3px var(--x-red-soft)}
+
+/* ---------- 揭穿动画：全屏遮罩，3 秒后渐变打开 ---------- */
+#xray-reveal{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;
+  background:radial-gradient(120% 90% at 50% 30%,#FFF8F7 0%,#FDF1F0 45%,#F7E7E7 100%);
+  opacity:0;visibility:hidden;transition:opacity .55s var(--ease),visibility .55s}
+#xray-reveal.on{opacity:1;visibility:visible}
+#xray-reveal .x-panel{max-width:min(720px,92vw);padding:34px 34px 28px;text-align:left;transform:translateY(14px) scale(.985);
+  opacity:0;transition:transform .7s var(--out),opacity .7s var(--out)}
+#xray-reveal.show .x-panel{transform:none;opacity:1}
+#xray-reveal .x-kick{font:400 11px/1.5 var(--mono,monospace);letter-spacing:.16em;color:var(--x-red);text-transform:uppercase}
+#xray-reveal h2.x-big{margin:10px 0 0;font:700 clamp(38px,7.2vw,84px)/1.03 var(--serif,"Songti SC",serif);color:var(--x-ink);
+  letter-spacing:-.02em}
+#xray-reveal h2.x-big em{font-style:normal;color:var(--x-red);position:relative;white-space:nowrap}
+#xray-reveal h2.x-big em::after{content:"";position:absolute;left:-2%;right:-2%;bottom:.08em;height:.16em;border-radius:3px;
+  background:var(--x-red);opacity:.28;transform:scaleX(0);transform-origin:left;transition:transform .8s .35s var(--out)}
+#xray-reveal.show h2.x-big em::after{transform:scaleX(1)}
+#xray-reveal .x-sub{margin:16px 0 0;font-size:16px;line-height:1.75;color:var(--ink-70);max-width:56ch}
+#xray-reveal .x-sub b{color:var(--x-ink);font-weight:600}
+#xray-reveal .x-count{display:flex;gap:22px;margin:24px 0 0;padding-top:18px;border-top:1px solid var(--line)}
+#xray-reveal .x-count div{display:grid;gap:4px}
+#xray-reveal .x-count b{font:600 30px/1 var(--mono,monospace);color:var(--x-ink)}
+#xray-reveal .x-count span{font-size:12px;color:var(--ink-50)}
+#xray-reveal .x-go{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+#xray-reveal .x-go button{height:44px;padding:0 22px;border-radius:999px;border:0;cursor:pointer;
+  font:500 14px var(--sans,system-ui);background:var(--x-ink);color:#fff;transition:transform .2s var(--ease),background .2s}
+#xray-reveal .x-go button:hover{transform:translateY(-1px)}
+#xray-reveal .x-go button.ghost{background:transparent;color:var(--ink-70);box-shadow:inset 0 0 0 1px var(--line)}
+#xray-reveal .x-go button.ghost:hover{background:rgba(0,0,0,.03)}
+#xray-reveal .x-progress{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(215,38,61,.12);overflow:hidden}
+#xray-reveal .x-progress i{display:block;height:100%;width:0;background:var(--x-red);transition:width .25s linear}
+
+/* ---------- 可疑处：标红下划线 + 脉冲圈 ---------- */
+.x-flag{position:relative;cursor:pointer;text-decoration:none;transition:background .2s}
+.x-flag::after{content:"";position:absolute;left:-2px;right:-2px;bottom:-2px;height:2px;border-radius:2px;
+  background:var(--x-red);opacity:.85;transform:scaleX(0);transform-origin:left;transition:transform .45s var(--out)}
+.xray-flags-on .x-flag::after{transform:scaleX(1)}
+.x-flag:hover{background:linear-gradient(transparent 62%,var(--x-red-soft) 62%)}
+.x-flag.x-open{background:linear-gradient(transparent 55%,rgba(215,38,61,.2) 55%)}
+.x-flag.x-strong{box-shadow:0 0 0 2px var(--x-red),0 6px 18px -8px rgba(215,38,61,.6);border-radius:6px}
+.x-circle-target{position:relative;z-index:21!important;border-radius:10px;box-shadow:0 0 0 3px var(--x-red),0 0 0 9px rgba(215,38,61,.14)!important;transition:box-shadow .35s}
+.xray-flags-on .x-flag.x-strong{animation:x-pulse 2.2s ease-in-out 2}
+@keyframes x-pulse{0%,100%{box-shadow:0 0 0 2px var(--x-red),0 0 0 0 rgba(215,38,61,.35)}50%{box-shadow:0 0 0 2px var(--x-red),0 0 0 10px rgba(215,38,61,0)}}
+.x-flag mark{background:none;color:inherit}
+
+/* 大红圈：手绘圈 + 圈旁一句话引导 */
+.x-circle{position:absolute;pointer-events:none;z-index:20;overflow:visible}
+.x-circle path{fill:none;stroke:var(--x-red);stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:var(--len,2600);stroke-dashoffset:var(--len,2600);
+  transition:stroke-dashoffset 1s var(--out);filter:drop-shadow(0 2px 6px rgba(215,38,61,.25))}
+.x-circle.drawn path{stroke-dashoffset:0}
+.x-circle .x-badge{position:absolute;left:0;top:0;display:inline-flex;align-items:center;gap:6px;
+  padding:7px 12px;border-radius:999px;background:var(--x-red);color:#fff;
+  font:600 13px/1.2 var(--sans,system-ui);white-space:nowrap;
+  box-shadow:0 10px 24px -10px rgba(215,38,61,.75);cursor:pointer;pointer-events:auto;
+  opacity:0;transition:opacity .35s var(--out);
+  text-decoration:none}
+.x-badge{opacity:0;transition:opacity .35s var(--out);transition-delay:.45s}
+.xray-flags-on .x-badge,.x-badge.on{opacity:1}
+.x-badge{opacity:0!important}
+.xray-flags-on .x-badge{opacity:1!important}
+.x-circle .x-badge:hover{background:#B91C30;box-shadow:0 12px 26px -10px rgba(215,38,61,.9)}
+.x-circle .x-badge i{font-style:normal;font-size:11px;opacity:.85}
+.x-circle .x-badge .arr{font-size:11px;opacity:.9}
+
+/* ---------- 证据卡：点开后的浮层 ---------- */
+#xray-card{position:fixed;z-index:10000;width:min(440px,calc(100vw - 28px));max-height:min(80vh,680px);overflow:auto;
+  background:var(--x-paper);border:1px solid var(--line);border-radius:18px;
+  box-shadow:0 28px 70px -30px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.6) inset;
+  opacity:0;transform:translateY(8px) scale(.985);pointer-events:none;transition:opacity .22s var(--ease),transform .22s var(--ease)}
+#xray-card.on{opacity:1;transform:none;pointer-events:auto}
+#xray-card .xc-head{display:flex;align-items:flex-start;gap:10px;padding:16px 16px 0}
+#xray-card .xc-tag{flex:none;padding:3px 8px;border-radius:6px;font:600 10px/1.6 var(--mono,monospace);letter-spacing:.08em;
+  text-transform:uppercase;background:var(--x-red-soft);color:var(--x-red)}
+#xray-card .xc-tag.warn{background:rgba(214,158,46,.16);color:#8a6412}
+#xray-card h3{margin:0;font:600 17px/1.35 var(--sans,system-ui);color:var(--x-ink);flex:1}
+#xray-card .xc-close{flex:none;width:28px;height:28px;border-radius:50%;border:0;background:rgba(0,0,0,.05);cursor:pointer;
+  font:400 16px/1 var(--sans);color:var(--ink-70)}
+#xray-card .xc-body{padding:12px 16px 16px}
+#xray-card .xc-row{display:grid;gap:4px;padding:10px 0;border-top:1px solid var(--line-2)}
+#xray-card .xc-row:first-child{border-top:0;padding-top:6px}
+#xray-card .xc-row .lab{font:400 10px/1.6 var(--mono,monospace);letter-spacing:.12em;color:var(--ink-50);text-transform:uppercase}
+#xray-card .xc-row .val{font-size:13.5px;line-height:1.7;color:var(--ink-85)}
+#xray-card .xc-row.claim .val{font-style:italic}
+#xray-card .xc-row.fact .lab{color:var(--x-red)}
+#xray-card .xc-row.fact .val{color:var(--x-ink)}
+#xray-card pre.x-code{margin:6px 0 0;padding:10px 12px;border-radius:10px;background:#17171A;color:#E9E9EC;overflow:auto;
+  font:400 11.5px/1.65 var(--mono,monospace);white-space:pre}
+#xray-card .xc-foot{display:flex;gap:8px;flex-wrap:wrap;padding:0 16px 16px}
+#xray-card .xc-foot button,#xray-card .xc-foot a{height:34px;padding:0 14px;border-radius:999px;border:0;cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;font:500 12.5px var(--sans);text-decoration:none;
+  background:rgba(0,0,0,.05);color:var(--ink);transition:background .2s}
+#xray-card .xc-foot button:hover,#xray-card .xc-foot a:hover{background:rgba(0,0,0,.1)}
+#xray-card .xc-foot .primary{background:var(--x-ink);color:#fff}
+#xray-card .xc-note{padding:0 16px 14px;font-size:11.5px;line-height:1.65;color:var(--ink-50)}
+
+/* ---------- 俏皮风：公司和顾问信息 ---------- */
+#xray-sassy{position:fixed;right:16px;bottom:64px;z-index:9997;width:min(360px,calc(100vw - 32px));
+  background:#FFF9F5;border:1px solid rgba(215,38,61,.25);border-radius:20px;padding:16px 16px 14px;
+  box-shadow:0 24px 60px -28px rgba(0,0,0,.4);opacity:0;transform:translateY(10px) rotate(-.6deg);
+  pointer-events:none;transition:opacity .3s var(--ease),transform .35s var(--out)}
+#xray-sassy.on{opacity:1;transform:none;pointer-events:auto}
+#xray-sassy .xs-head{display:flex;align-items:center;gap:8px}
+#xray-sassy .xs-face{width:30px;height:30px;border-radius:50%;background:#FFE1DC;display:grid;place-items:center;font-size:17px}
+#xray-sassy b{font:600 14px var(--sans);color:var(--x-ink)}
+#xray-sassy .xs-close{margin-left:auto;width:26px;height:26px;border:0;border-radius:50%;background:rgba(0,0,0,.05);cursor:pointer;font-size:14px}
+#xray-sassy .xs-q{margin:10px 0 0;font:600 17px/1.5 var(--serif,"Songti SC",serif);color:var(--x-red);transform-origin:left;
+  animation:none}
+#xray-sassy.on .xs-q{animation:x-wiggle .7s var(--out) 1 .15s}
+@keyframes x-wiggle{0%{transform:rotate(-2.5deg) scale(.97)}35%{transform:rotate(2deg) scale(1.02)}70%{transform:rotate(-.8deg) scale(1)}100%{transform:none}}
+#xray-sassy ul{margin:10px 0 0;padding:0;list-style:none;display:grid;gap:6px}
+#xray-sassy li{display:flex;gap:8px;font-size:12.5px;line-height:1.6;color:var(--ink-70);padding:7px 9px;border-radius:10px;background:rgba(215,38,61,.05)}
+#xray-sassy li b{color:var(--x-ink)}
+#xray-sassy li i{font-style:normal;flex:none}
+#xray-sassy .xs-foot{margin-top:10px;font-size:11px;color:var(--ink-50);line-height:1.6}
+
+/* ---------- 右下工具条 ---------- */
+#xray-tools{position:fixed;right:14px;bottom:14px;z-index:9998;display:flex;gap:8px;align-items:center;
+  padding:6px;border-radius:999px;background:rgba(255,253,251,.94);border:1px solid var(--line);
+  box-shadow:0 10px 30px -18px rgba(0,0,0,.4);backdrop-filter:blur(10px)}
+#xray-tools button{height:30px;padding:0 12px;border:0;border-radius:999px;background:transparent;cursor:pointer;
+  font:500 12px var(--sans);color:var(--ink-70);transition:background .2s,color .2s}
+#xray-tools button[aria-pressed="true"]{background:var(--x-ink);color:#fff}
+#xray-tools button:hover{background:rgba(0,0,0,.06)}
+#xray-tools .sep{width:1px;height:18px;background:var(--line)}
+
+/* ---------- 证据抽屉：自证清单 ---------- */
+#xray-drawer{position:fixed;inset:0;z-index:10001;display:grid;grid-template-columns:minmax(0,1fr) min(520px,100vw);
+  background:rgba(20,18,20,.35);opacity:0;visibility:hidden;transition:opacity .3s var(--ease),visibility .3s}
+#xray-drawer.on{opacity:1;visibility:visible}
+#xray-drawer .xd-main{background:var(--x-paper);overflow:auto;padding:26px 28px 40px;transform:translateX(24px);transition:transform .4s var(--out)}
+#xray-drawer.on .xd-main{transform:none}
+#xray-drawer .xd-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:6px}
+#xray-drawer .xd-head h2{margin:0;font:600 15px var(--sans)}
+#xray-drawer .xd-head .xd-x{margin-left:auto;width:30px;height:30px;border:0;border-radius:50%;background:rgba(0,0,0,.06);cursor:pointer}
+#xray-drawer h3{margin:22px 0 8px;font:600 13px var(--sans);letter-spacing:.02em}
+#xray-drawer .xd-item{padding:12px;border-radius:12px;background:#fff;border:1px solid var(--line);margin-bottom:8px}
+#xray-drawer .xd-item b{display:block;font:600 13.5px var(--sans);margin-bottom:4px}
+#xray-drawer .xd-item p{margin:0;font-size:12.5px;line-height:1.7;color:var(--ink-70)}
+#xray-drawer .xd-item button{margin-top:8px;height:30px;padding:0 12px;border:0;border-radius:999px;background:#17171A;color:#fff;font:500 12px var(--sans);cursor:pointer}
+#xray-drawer .xd-item .out{margin-top:8px}
+#xray-drawer pre{margin:0;padding:10px 12px;border-radius:10px;background:#17171A;color:#E9E9EC;overflow:auto;font:400 11.5px/1.65 var(--mono);white-space:pre}
+#xray-drawer .xd-disclaimer{margin-top:18px;padding:12px;border-radius:12px;background:rgba(214,158,46,.1);font-size:11.5px;line-height:1.7;color:#6b5420}
+
+/* ---------- 小屏 ---------- */
+@media (max-width:800px){
+  #xray-tools{right:10px;bottom:10px;left:10px;justify-content:center;padding:5px}
+  #xray-tools button{padding:0 9px;font-size:11.5px}
+  #xray-badge{left:10px;bottom:54px;font-size:11px}
+  #xray-sassy{right:10px;left:10px;bottom:54px;width:auto}
+  #xray-reveal .x-panel{padding:24px 20px 20px}
+  #xray-card{position:fixed!important;left:10px!important;right:10px!important;width:auto!important;top:auto!important;
+    bottom:10px!important;max-height:70vh}
+  #xray-drawer{grid-template-columns:100%;align-items:end}
+  #xray-drawer .xd-main{max-height:88vh;border-radius:20px 20px 0 0;transform:translateY(30px)}
+}
+
+@media (prefers-reduced-motion:reduce){
+  #xray-reveal,#xray-reveal .x-panel,#xray-card,#xray-sassy,.x-circle path{transition-duration:.01ms!important}
+  #xray-sassy.on .xs-q{animation:none}
+  .xray-flags-on .x-flag.x-strong{animation:none}
+}
+
+/* ---------- 前几秒：与原站完全一致，不出现任何扩展 UI ---------- */
+html.xray-idle #xray-tools,
+html.xray-idle #xray-badge{opacity:0!important;visibility:hidden!important;pointer-events:none!important;transition:opacity .35s var(--ease),visibility .35s}
+/* 选择“先看原样”后：只保留角标，工具条收起 */
+html.xray-plain #xray-tools{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
